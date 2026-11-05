@@ -14,9 +14,6 @@ function [results, path_results] = ...
         % Calculate delta hedge
         path.delta_hedge = calculate_delta_hedge(path, params);
 
-        % Calculate static minimum variance hedge
-        path.smv_hedge = calculate_mvhr(path, params);
-
         % Store entire path including histories
         if i == 1
             path_results = repmat(path, nsample, 1);
@@ -25,6 +22,9 @@ function [results, path_results] = ...
         path_results(i) = path;
 
     end
+
+    % Calculate static minimum variance hedge
+    path_results.smv_hedge = calculate_mvhr(path_results, params);
 
     % Aggregate results
     results = aggregate_hedging_results(path_results);
@@ -196,12 +196,12 @@ function results = aggregate_hedging_results(path_results)
     
         path = path_results(i);
     
-        if ~isfield(path, 'hedge') || isempty(path.hedge)
+        if ~isfield(path, 'delta_hedge') || isempty(path.delta_hedge)
             continue;
         end
     
-        CHI = path.hedge.CHI;
-        portfolio = path.hedge.portfolio;
+        CHI = path.delta_hedge.CHI;
+        portfolio = path.delta_hedge.portfolio;
     
         if numel(CHI) < 2
             continue;
