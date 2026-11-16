@@ -99,8 +99,14 @@ function hedge = calculate_delta_hedge(path, params)
     % Finite-difference delta
     delta = (P_plus - P_minus) ./ (CHI_plus - CHI_minus);
 
-    % Replicate original portfolio definition
-    portfolio = path.chi_history - delta .* bond.P_bond;
+    % Regularization parameter
+    epsilon = 1e-3;
+    
+    % Regularized inverse-delta hedge ratio
+    hedge_ratio = delta ./ (delta.^2 + epsilon^2);
+    
+    % Hedged portfolio
+    portfolio = path.chi_history - hedge_ratio .* bond.P_bond;
 
     % Return results
     hedge.CHI = path.chi_history;
